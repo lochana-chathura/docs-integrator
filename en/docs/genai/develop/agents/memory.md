@@ -189,6 +189,8 @@ The **Table Configuration** record contains the following fields:
 The store keys items by a `MemoryKey` partition key and a `MessageId` sort key. Session IDs beginning with `checkpoint#` are reserved for human-in-the-loop pause checkpoints and are rejected.
 :::
 
+The same store also persists paused runs for tools that require approval before they run. A durable store lets a pending approval survive a restart or be resolved by a different replica. For details, see [Tool Approval](tool-approval.md).
+
 ## Overflow configuration
 
 Memory works as a sliding window. When new conversation turns exceed the configured memory limit, the **Overflow Configuration** determines how older messages are handled.
@@ -234,6 +236,8 @@ public type Memory distinct isolated object {
     function delete(string key) returns ai:MemoryError?;
 };
 ```
+
+A custom `ai:ShortTermMemoryStore` must additionally implement four checkpoint methods that persist paused human-in-the-loop runs: `putCheckpoint`, `getCheckpoint`, `removeCheckpoint`, and `takeCheckpoint`. See [Human-in-the-Loop](human-in-the-loop.md#make-pauses-survive-a-restart).
 
 The following example shows a minimal PostgreSQL-backed implementation.
 
@@ -299,5 +303,4 @@ The following table provides general recommendations for choosing a memory setup
 ## What's next
 
 - **[Identity & access management](identity-and-access-management.md)** - Secure agents, tools, and integrations using authentication and authorization.
-- **[Observability](observability.md)** — See which tools the agent actually selects.
-- **[Evaluations](evaluations/overview.md)** — Learn how to prevent regressions in AI agent quality.
+- **[Human-in-the-Loop](human-in-the-loop.md)** — Pause the agent for approval before it runs a sensitive tool.
