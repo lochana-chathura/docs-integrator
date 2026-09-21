@@ -130,7 +130,7 @@ Selecting **PostgreSQL Short Term Memory Store** opens a configuration form for 
 |---|---|---|
 | **Max Messages Per Key** | `20` | Defines the maximum number of interactive messages stored per session ID. When the limit is reached, the oldest messages are removed. |
 | **Table Name** | `"chat_messages"` | Specifies the database table used to store chat messages. If the table does not exist, it is created automatically. Must start with a letter or underscore and contain only letters, digits, and underscores. Note that PostgreSQL folds unquoted identifiers to lower case. |
-| **Checkpoint Table Name** | `"checkpoints"` | Specifies the database table used to store human-in-the-loop pause checkpoints. It is created lazily on first use and must be different from the chat messages table. The same identifier rules apply. |
+| **Checkpoint Table Name** | `"checkpoints"` | Specifies the database table used to store approval pause checkpoints. It is created lazily on first use and must be different from the chat messages table. The same identifier rules apply. |
 
 ### Creating a SQLite short-term memory store
 
@@ -149,7 +149,7 @@ Selecting **SQLite Short Term Memory Store** opens a configuration form for crea
 |---|---|---|
 | **Maximum Messages Per Key** | `20` | Defines the maximum number of interactive messages stored per session ID. When the limit is reached, the oldest messages are removed. |
 | **Table Name** | `"chat_messages"` | Specifies the database table used to store chat messages. If the table does not exist, it is created automatically. Must start with a letter or underscore and contain only letters, digits, and underscores. |
-| **Checkpoint Table Name** | `"checkpoints"` | Specifies the database table used to store human-in-the-loop pause checkpoints. It is created lazily on first use and must be different from the chat messages table. The same identifier rules apply. |
+| **Checkpoint Table Name** | `"checkpoints"` | Specifies the database table used to store approval pause checkpoints. It is created lazily on first use and must be different from the chat messages table. The same identifier rules apply. |
 
 :::note
 SQLite is a single-writer database, so the store pins its connection pool to a single connection. A `jdbc:sqlite::memory:` database lives in the integration process and loses its data on shutdown — use a file-backed URL for memory that must survive restarts.
@@ -186,10 +186,10 @@ The **Table Configuration** record contains the following fields:
 | **Server-Side Encryption** | `()` | Optional server-side encryption settings applied when the store creates the table. If omitted, the table uses the default AWS-owned encryption key. |
 
 :::note
-The store keys items by a `MemoryKey` partition key and a `MessageId` sort key. Session IDs beginning with `checkpoint#` are reserved for human-in-the-loop pause checkpoints and are rejected.
+The store keys items by a `MemoryKey` partition key and a `MessageId` sort key. Session IDs beginning with `checkpoint#` are reserved for approval pause checkpoints and are rejected.
 :::
 
-The same store also persists paused runs for tools that require approval before they run. A durable store lets a pending approval survive a restart or be resolved by a different replica. For details, see [Tool Approval](tool-approval.md).
+The same store also persists paused runs for tools that require approval before they run. A durable store lets a pending approval survive a restart or be resolved by a different replica. For details, see [Gated Tools](gated-tools.md).
 
 ## Overflow configuration
 
@@ -237,7 +237,7 @@ public type Memory distinct isolated object {
 };
 ```
 
-A custom `ai:ShortTermMemoryStore` must additionally implement four checkpoint methods that persist paused human-in-the-loop runs: `putCheckpoint`, `getCheckpoint`, `removeCheckpoint`, and `takeCheckpoint`. See [Human-in-the-Loop](human-in-the-loop.md#make-pauses-survive-a-restart).
+A custom `ai:ShortTermMemoryStore` must additionally implement four checkpoint methods that persist paused runs awaiting approval: `putCheckpoint`, `getCheckpoint`, `removeCheckpoint`, and `takeCheckpoint`. See [Gated Tools](gated-tools.md#make-pauses-survive-a-restart).
 
 The following example shows a minimal PostgreSQL-backed implementation.
 
@@ -303,4 +303,6 @@ The following table provides general recommendations for choosing a memory setup
 ## What's next
 
 - **[Identity & access management](identity-and-access-management.md)** - Secure agents, tools, and integrations using authentication and authorization.
-- **[Human-in-the-Loop](human-in-the-loop.md)** — Pause the agent for approval before it runs a sensitive tool.
+- **[Gated Tools](gated-tools.md)** — Pause the agent for approval before it runs a sensitive tool.
+- **[Observability](observability.md)** — See which tools the agent actually selects.
+- **[Evaluations](evaluations/overview.md)** — Learn how to prevent regressions in AI agent quality.
