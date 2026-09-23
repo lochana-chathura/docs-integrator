@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 title: Memory
 description: Reference for configuring AI agent memory in WSO2 Integrator — short-term in-memory, MSSQL, Redis, PostgreSQL, SQLite, Amazon DynamoDB, custom stores, overflow strategy, and the state after memory is attached.
 keywords: [wso2 integrator, ai agent, memory, short term memory, memory store, mssql, redis, postgresql, sqlite, dynamodb, session]

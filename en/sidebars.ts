@@ -2113,8 +2113,8 @@ const sidebars: SidebarsConfig = {
               items: [
                 'genai/develop/agents/creating-an-agent',
                 'genai/develop/agents/tools',
-                'genai/develop/agents/memory',
                 'genai/develop/agents/gated-tools',
+                'genai/develop/agents/memory',
                 'genai/develop/agents/observability',
                 {
                   type: 'category',
