@@ -79,21 +79,47 @@ Tools discovered from an MCP server are generated from the remote server's tool 
 
 Gating every call to a tool is often stricter than you need. A refund of 5 USD and a refund of 5000 USD are the same tool call, but only one of them needs a person's attention. **Approval Function** lets you decide for each call, based on the arguments the agent proposes.
 
-Tick **Requires Approval**, then set **Approval Function** either by picking one of your project's own functions, or by typing a new name. Typing a new name has WSO2 Integrator generate a function next to the tool with the correct signature and a placeholder body. Generating a function this way is only available while you are creating the tool. If you edit a tool that already exists, **Approval Function** offers only your project's functions to pick from, so create the function first, then select it.
+Tick **Requires Approval**, then set **Approval Function** either by picking one of your project's own functions, or by typing a new name.
+
+:::caution[The picker isn't filtered by signature]
+The function you pick for **Approval Function** must take the same parameters as the tool it gates and return `boolean`. The picker lists every function in your project, not just ones that match.
+:::
+
+Typing a new name has WSO2 Integrator generate a function next to the tool with the correct signature and a placeholder body. Generating a function this way is only available while you are creating the tool. If you edit a tool that already exists, **Approval Function** offers only your project's functions to pick from, so create the function first, then select it.
 
 ![Approval Function field with a new function name typed in](/img/genai/develop/agents/gated-tools/approval-function-field.png)
 
-<!-- TODO: screenshot /img/genai/develop/agents/34-approval-predicate-stub.png : the generated function returning boolean with its TODO comment -->
-
-Open the generated function and replace the placeholder body with the real condition. Returning `true` pauses that tool call for approval, and returning `false` lets it run.
+Open the generated function and replace the placeholder body with the real condition. When the condition holds, that call is gated and pauses for approval. When it doesn't, the call is ungated and runs immediately.
 
 <Tabs>
+<TabItem value="ui" label="Visual Designer" default>
+
+Click the generated function in the left panel to open it.
+
+![The project's function list in the left panel, with refundNeedsReview listed and about to be clicked](/img/genai/develop/agents/gated-tools/approval-function-panel-view.png)
+
+Click the **Return** step. The right panel shows the return expression, starting with the default placeholder value, `true`. Change it to the real condition, for example `amount > 100d`.
+
+![refundNeedsReview's Return step selected, with the right panel showing the expression changed to amount > 100d](/img/genai/develop/agents/gated-tools/approval-function-edit.png)
+
+</TabItem>
 <TabItem value="code" label="Ballerina Code">
 
+Generated for you, with a placeholder body:
+
 ```ballerina
-// Generated for you. Pause only when the refund is large.
-isolated function refundNeedsReview(string orderId, decimal amount) returns boolean =>
-    amount > 100d;
+isolated function refundNeedsReview(string orderId, decimal amount) returns boolean {
+    // TODO: inspect the proposed arguments and return true to require approval
+    return true;
+}
+```
+
+Edited to the real condition:
+
+```ballerina
+isolated function refundNeedsReview(string orderId, decimal amount) returns boolean {
+    return amount > 100d;
+}
 ```
 
 </TabItem>
@@ -101,8 +127,8 @@ isolated function refundNeedsReview(string orderId, decimal amount) returns bool
 
 Keep the following constraints in mind.
 
-- The function must take the same parameters as the tool it gates and return `boolean`, whether it is generated for you or picked from your project. **Approval Function** does not filter its picker by signature, so if you pick or edit a function so that it no longer matches, the project fails to build.
-- The function runs synchronously, as part of the agent's reasoning, so keep it fast rather than doing something slow like a network call. Nothing caches its result, so it must return the same answer every time it is called with the same arguments.
+- The function runs synchronously, as part of the agent's reasoning, so keep it fast rather than doing something slow like a network call.
+- The function can be evaluated again later for the same call, so it must return the same answer every time.
 - The function fails safe. If it panics or does not return a `boolean`, the tool call pauses for approval rather than running unreviewed.
 
 ## 3. See which tools are gated
@@ -111,36 +137,7 @@ Gated tools are marked with a badge in the bottom-right corner of the tool in th
 
 ![Agent node showing the approval badge and its tooltip](/img/genai/develop/agents/gated-tools/tool-approval-badge.png)
 
-## 4. Approve or reject in the agent chat
-
-Open the chat interface from the agent canvas and send a message that leads the agent to a gated tool. Instead of a text reply, the agent responds with an approval card headed **Approval required**, followed by the number of pending requests.
-
-<!-- TODO: screenshot /img/genai/develop/agents/36-chat-approval-card.png : chat approval card with arguments expanded and the input reading "Waiting on your decision…" -->
-
-Each pending request shows its position in the batch, such as `1/2`, the tool name, and the tool description. Click **Show arguments** to inspect the exact arguments the agent proposes to use, and **Hide arguments** to collapse them again.
-
-Respond using the following controls.
-
-| Control | Description |
-|---|---|
-| **Approve** | Runs the proposed tool call as it stands. |
-| **Reject** | Blocks the tool call and opens a box for an optional reason. |
-| **Confirm Reject** | Submits the rejection along with the reason. |
-| **Cancel** | Discards the rejection and returns to the **Approve** and **Reject** buttons. |
-| **Approve All** | Approves every pending request. Appears only when more than one request is pending. |
-| **Reject All** | Rejects every pending request. Appears only when more than one request is pending. |
-
-<!-- TODO: screenshot /img/genai/develop/agents/37-reject-reason.png : reject reason box with Cancel and Confirm Reject -->
-
-The reason you type is shown to the agent, so use it to explain what to do instead rather than only why the tool call was blocked.
-
-While a decision is outstanding, the chat input is disabled and its placeholder reads **Waiting on your decision…**. Once every request is decided, the card collapses to a one-line summary of what was approved or rejected, and the agent continues its run.
-
-<!-- TODO: screenshot /img/genai/develop/agents/38-approval-card-collapsed.png : collapsed approval card summarising what was approved and rejected -->
-
-An agent can pause more than once in a single turn, so you may see several cards before you get a final answer.
-
-## 5. Make pauses survive a restart {#make-pauses-survive-a-restart}
+## 4. Make pauses survive a restart {#make-pauses-survive-a-restart}
 
 A paused run is stored as a checkpoint in the agent's memory store, keyed by the session ID. Where that store keeps its data determines whether a pending approval survives.
 
@@ -151,7 +148,7 @@ A paused run is stored as a checkpoint in the agent's memory store, keyed by the
 
 The default is fine while you develop and test. For production, where a person may take hours to respond, attach a durable store to the agent's memory. See [Memory](memory.md#add-memory-store).
 
-<!-- TODO: screenshot /img/genai/develop/agents/39-memory-store-attached.png : agent node with a database-backed short-term memory store attached -->
+![Agent node with a database-backed short-term memory store attached](/img/genai/develop/agents/gated-tools/memory-store-attached.png)
 
 ## Choose what to gate
 
