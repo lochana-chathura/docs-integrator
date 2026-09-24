@@ -14,7 +14,7 @@ By default, an agent runs on autopilot. It reasons and calls tools in a loop unt
 Gating a tool makes the agent pause immediately before it runs that tool, show what it proposes to do, and continue once a person has approved or rejected the tool call.
 
 :::info When to use something else
-A gated tool answers one question: may this tool call run? The answer is yes or no, and nothing about the decision is recorded. If you need a named approver, a deadline, a record of who decided, a person who supplies a value rather than permitting an action, or a repair after a step fails, use a human task in a durable workflow instead.
+A gated tool answers one question: may this tool call run? The decision isn't recorded. If you need a named approver, a deadline, an audit trail, a supplied value, or failure recovery, use a [human task](../../../workflows/develop/await-human-task.md) in a [durable workflow](../../../workflows/overview.md) instead.
 :::
 
 ## How it works
@@ -36,22 +36,24 @@ Rejection is not simply a failure. The agent receives the rejection, along with 
 
 ## 1. Gate a tool
 
-Gating is configured on the tool, not on the agent. Select the **AI Agent** node in the agent canvas and click the **+** button to open the **Add Tool** panel, then choose how you want to add the tool. For details on each option, see [Tools](tools.md).
+Gating is configured on the tool, not on the agent.
+
+1. Select the **AI Agent** node in the agent canvas.
+2. Click the **+** button to open the **Add Tool** panel.
+3. Choose how you want to add the tool. For details on each option, see [Tools](tools.md).
 
 ![Add tool](/img/genai/develop/agents/29-tool.png)
 
-In the tool configuration panel, tick **Requires Approval**.
+4. In the tool configuration panel, tick **Requires Approval**.
 
 ![Tool configuration panel with Requires Approval ticked and Approval Function empty](/img/genai/develop/agents/gated-tools/required-approval-field.png)
 
-Configure the following fields.
+5. Configure the following fields.
 
 | Field | Description |
 |---|---|
 | **Requires Approval** | Optional. Pauses the tool before it runs and waits for approval. Off by default. |
 | **Approval Function** | Optional. Decides for each tool call whether approval is needed. Available only when **Requires Approval** is ticked. Leave it empty to require approval for every call. For conditional gating, see [Gate a tool conditionally](#2-gate-a-tool-conditionally). |
-
-Save the tool with **Create Tool** or **Save Tool**.
 
 These fields combine to give three behaviours.
 
@@ -60,6 +62,8 @@ These fields combine to give three behaviours.
 | **Requires Approval** off | The tool runs freely. The agent never pauses for it. |
 | **Requires Approval** ticked, **Approval Function** empty | Every call to this tool pauses for approval. |
 | **Requires Approval** ticked, **Approval Function** set | Only the tool calls the function accepts pause. |
+
+6. Save the tool with **Create Tool** or **Save Tool**.
 
 ### Where the field appears
 
@@ -79,7 +83,8 @@ Tools discovered from an MCP server are generated from the remote server's tool 
 
 Gating every call to a tool is often stricter than you need. A refund of 5 USD and a refund of 5000 USD are the same tool call, but only one of them needs a person's attention. **Approval Function** lets you decide for each call, based on the arguments the agent proposes.
 
-Tick **Requires Approval**, then set **Approval Function** either by picking one of your project's own functions, or by typing a new name.
+1. Tick **Requires Approval**.
+2. Set **Approval Function**, either by picking one of your project's own functions, or by typing a new name.
 
 :::caution[The picker isn't filtered by signature]
 The function you pick for **Approval Function** must take the same parameters as the tool it gates and return `boolean`. The picker lists every function in your project, not just ones that match.
@@ -89,16 +94,16 @@ Typing a new name has WSO2 Integrator generate a function next to the tool with 
 
 ![Approval Function field with a new function name typed in](/img/genai/develop/agents/gated-tools/approval-function-field.png)
 
-Open the generated function and replace the placeholder body with the real condition. When the condition holds, that call is gated and pauses for approval. When it doesn't, the call is ungated and runs immediately.
+3. Open the generated function and replace the placeholder body with the real condition. When the condition holds, that call is gated and pauses for approval. When it doesn't, the call is ungated and runs immediately.
 
 <Tabs>
 <TabItem value="ui" label="Visual Designer" default>
 
-Click the generated function in the left panel to open it.
+1. Click the generated function in the left panel to open it.
 
 ![The project's function list in the left panel, with refundNeedsReview listed and about to be clicked](/img/genai/develop/agents/gated-tools/approval-function-panel-view.png)
 
-Click the **Return** step. The right panel shows the return expression, starting with the default placeholder value, `true`. Change it to the real condition, for example `amount > 100d`.
+2. Click the **Return** step. The right panel shows the return expression, starting with the default placeholder value, `true`. Change it to the real condition, for example `amount > 100d`.
 
 ![refundNeedsReview's Return step selected, with the right panel showing the expression changed to amount > 100d](/img/genai/develop/agents/gated-tools/approval-function-edit.png)
 
