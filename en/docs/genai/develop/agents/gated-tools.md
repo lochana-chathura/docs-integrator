@@ -6,6 +6,7 @@ keywords: [wso2 integrator, gated tools, tool approval, approval gate, ai agents
 ---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import HitlRoutingTable from '@site/src/components/HitlRoutingTable';
 
 # Gated Tools
 
@@ -13,9 +14,13 @@ By default, an agent runs on autopilot. It reasons and calls tools in a loop unt
 
 Gating a tool makes the agent pause immediately before it runs that tool, show what it proposes to do, and continue once a person has approved or rejected the tool call.
 
-:::info When to use something else
-A gated tool answers one question: may this tool call run? The decision isn't recorded. If you need a named approver, a deadline, an audit trail, a supplied value, or failure recovery, use a [human task](../../../workflows/develop/await-human-task.md) in a [durable workflow](../../../workflows/overview.md) instead.
-:::
+## Gated tools or durable workflows?
+
+WSO2 Integrator ships two ways to put a person in front of an agent. A gated tool answers one question, whether a tool call may run, and doesn't record who decided or when. [Durable workflows](../../../workflows/overview.md) cover everything else.
+
+<HitlRoutingTable />
+
+For what each feature covers and doesn't, see [Choosing between Gated Tools and Durable Workflows](gated-tools-vs-durable-workflows.md).
 
 ## How it works
 

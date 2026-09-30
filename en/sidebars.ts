@@ -2114,6 +2114,7 @@ const sidebars: SidebarsConfig = {
                 'genai/develop/agents/creating-an-agent',
                 'genai/develop/agents/tools',
                 'genai/develop/agents/gated-tools',
+                'genai/develop/agents/gated-tools-vs-durable-workflows',
                 'genai/develop/agents/memory',
                 'genai/develop/agents/observability',
                 {
@@ -2176,6 +2177,7 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       link: { type: 'doc', id: 'workflows/overview' },
       items: [
+        'workflows/gated-tools-vs-durable-workflows',
         // Getting Started
         {
           type: 'category',

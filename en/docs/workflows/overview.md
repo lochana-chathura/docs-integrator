@@ -7,6 +7,7 @@ sidebar_label: Overview
 
 import ThemedImage from '@theme/ThemedImage';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import HitlRoutingTable from '@site/src/components/HitlRoutingTable';
 
 # Durable Workflows
 
@@ -36,6 +37,14 @@ A workflow is a step-by-step process that completes a larger task. WSO2 Integrat
 | Best for known, fixed business logic | Best for branchy, hard-to-enumerate logic                            |
 
 Both run on the same durable runtime, so an AI agent gets crash safety, human tasks, timers, and retries for free.
+
+## Durable workflows or gated tools?
+
+WSO2 Integrator ships two ways to put a person in front of an agent. Durable workflows cover approvals, typed decisions, deadlines, and repairs after a failure. A [gated tool](../genai/develop/agents/gated-tools.md) only answers whether a tool call may run, and doesn't record who decided or when.
+
+<HitlRoutingTable />
+
+For what each feature covers and doesn't, see [Choosing between Gated Tools and Durable Workflows](gated-tools-vs-durable-workflows.md).
 
 ## Getting started
 
